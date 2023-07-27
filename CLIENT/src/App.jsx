@@ -2,6 +2,10 @@ import { useState } from 'react'
 import Axios from 'axios'
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
+
+const MySwal = withReactContent(Swal)
 
 
 function App() {
@@ -29,9 +33,14 @@ function App() {
       anios:anios 
     }).then(() =>{
       getEmpleados();
-      alert("Empleado Registrado!!!")
       limpiarCampos();
-    
+      MySwal.fire({
+        title: "<strong>Registro Exitoso !!!</strong>",
+        html: "<i>El empleado"+ nombre + "fue registrado con exito </i>",
+        icon: 'success',
+        timer: 3000
+      })
+        
     })
   }
   
@@ -48,6 +57,12 @@ function App() {
     }).then(() =>{
       getEmpleados();
       limpiarCampos();
+      MySwal.fire({
+        title: "<strong>Registro actualizado !!!</strong>",
+        html: "<i>El empleado"+ nombre + "fue actualizado con exito </i>",
+        icon: 'success',
+        timer: 3000
+      })
       
     })
   }
@@ -61,6 +76,33 @@ function App() {
     setCargo(val.cargo);
     setAnios(val.anios);
     setId(val.id);
+  }
+
+  const deleteEmple = (val) => {
+    Swal.fire({
+      title: 'Confirmar Eliminado?',
+      html: "<i>Desea eliminar"+ val.nombre + "esta seguro</i>",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'si, eliminar!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        //utilizamos para realizar la peticion 
+          Axios.delete(`http://localhost:3001/delete/${val.id}`).then(() =>{
+          getEmpleados();
+          limpiarCampos(); 
+          Swal.fire(
+            'eliminado!',
+            val.nombre+'fue eliminado',
+            'success'
+          )
+          });
+        
+      }
+    })
+    
   }
 
   const getEmpleados = () => {
@@ -179,7 +221,9 @@ function App() {
                       editarEmpleado(val);
                     }}
                     >Editar</button>
-                    <button type="button" className="btn btn-danger">eliminar</button>
+                    <button type="button" onClick={() =>{
+                      deleteEmple(val);
+                    }} className="btn btn-danger">eliminar</button>
                     
                   </div>
                   </td>
